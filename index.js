@@ -35,10 +35,20 @@ async function downloadFile(url, downloadFolder) {
 
 async function getLinksFromConfig() {
     const timestamp = Date.now();
-    const configUrl = `https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxConfig.js?vt=${timestamp}`;
+    // Use a unique query parameter to ensure we bypass any potential CDN cache
+    const configUrl = `https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxConfig.js?ga_t=${timestamp}`;
     console.log(`Fetching config from ${configUrl}...`);
 
-    const response = await axios.get(configUrl);
+    const response = await axios.get(configUrl, {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Referer': 'https://im.qq.com/linuxqq/index.shtml',
+            'Origin': 'https://im.qq.com',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        }
+    });
     const text = response.data;
 
     // Extract JSON part: look for "var params= { ... };"
