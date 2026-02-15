@@ -35,94 +35,68 @@ async function downloadFile(url, downloadFolder) {
     });
 
     const page = await context.newPage();
-    let configLinks = [];
 
-    // Capture the content of linuxConfig.js directly from the browser's response
-    page.on('response', async (response) => {
-        if (response.url().includes('linuxConfig.js')) {
-            console.log(`Intercepted config from: ${response.url()}`);
-            try {
-                const text = await response.text();
-                const jsonMatch = text.match(/var params=\s*(\{[\s\S]*?\});/);
-                if (jsonMatch) {
-                    const config = JSON.parse(jsonMatch[1]);
-                    console.log(`Parsed version from intercepted config: ${config.version}`);
+    try {
+        const timestamp = Date.now();
+        // Navigate DIRECTLY to the config JS file to bypass any main-page caching/redirection issues
+        const url = `https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxConfig.js?ga_t=${timestamp}`;
 
-                    const extractUrls = (obj) => {
-                        let urls = [];
-                        for (const key in obj) {
-                            if (typeof obj[key] === 'string' && obj[key].startsWith('http')) {
-                                urls.push(obj[key]);
-                            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                                urls = urls.concat(extractUrls(obj[key]));
-                            }
-                        }
-                        return urls;
-                    };
-                    configLinks = extractUrls(config);
+        console.log(`Navigating directly to config URL: ${url}`);
+        await page.goto(url, { waitUntil: 'networkidle' });
+
+        // Extract the content directly from the page body (Chromium displays JS as text)
+        const text = await page.evaluate(() => document.body.innerText);
+
+        // Extract JSON part: look for "var params= { ... };"
+        const jsonMatch = text.match(/var params=\s*(\{[\s\S]*?\});/);
+
+        if (!jsonMatch) {
+            console.error('Failed to extract download links from direct page load. Content found:');
+            console.error(text.substring(0, 500));
+            return;
+        }
+
+        const config = JSON.parse(jsonMatch[1]);
+        console.log(`Successfully parsed version: ${config.version}`);
+
+        const extractUrls = (obj) => {
+            let urls = [];
+            for (const key in obj) {
+                if (typeof obj[key] === 'string' && obj[key].startsWith('http')) {
+                    urls.push(obj[key]);
+                } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    urls = urls.concat(extractUrls(obj[key]));
                 }
-            } catch (err) {
-                console.error('Error parsing intercepted config:', err.message);
+            }
+            return urls;
+        };
+        const links = extractUrls(config);
 
-                try {
-                    const timestamp = Date.now();
-                    // Navigate DIRECTLY to the config JS file to bypass any main-page caching/redirection issues
-                    const url = `https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxConfig.js?ga_t=${timestamp}`;
+        if (links.length === 0) {
+            console.error('No links found in the config object.');
+            return;
+        }
 
-                    console.log(`Navigating directly to config URL: ${url}`);
-                    await page.goto(url, { waitUntil: 'networkidle' });
+        console.log(`Found ${links.length} download links.`);
+        const versionMatch = path.basename(links[0]).match(/QQ_([0-9.]+_[0-9.]+)/);
+        const version = versionMatch ? versionMatch[1] : (config.version || 'unknown');
+        console.log(`Extracted version for release: ${version}`);
+        fs.writeFileSync('version.txt', version);
 
-                    // Extract the content directly from the page body (Chromium displays JS as text)
-                    const text = await page.evaluate(() => document.body.innerText);
+        let linksMd = '### Official Download Links\n\n| Filename | Official URL |\n| :--- | :--- |\n';
+        links.forEach(link => { linksMd += `| ${path.basename(link)} | [Download](${link}) |\n`; });
+        fs.writeFileSync('links.md', linksMd);
 
-                    // Extract JSON part: look for "var params= { ... };"
-                    const jsonMatch = text.match(/var params=\s*(\{[\s\S]*?\});/);
+        const downloadFolder = path.join(__dirname, 'downloads');
+        if (!fs.existsSync(downloadFolder)) fs.mkdirSync(downloadFolder);
 
-                    let links = [];
-                    if (jsonMatch) {
-                        const config = JSON.parse(jsonMatch[1]);
-                        console.log(`Successfully parsed version from direct page load: ${config.version}`);
-
-                        const extractUrls = (obj) => {
-                            let urls = [];
-                            for (const key in obj) {
-                                if (typeof obj[key] === 'string' && obj[key].startsWith('http')) {
-                                    urls.push(obj[key]);
-                                } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-                                    urls = urls.concat(extractUrls(obj[key]));
-                                }
-                            }
-                            return urls;
-                        };
-                        links = extractUrls(config);
-                    }
-
-                    if (links.length === 0) {
-                        console.error('Failed to extract download links from direct page load. Content found:');
-                        console.error(text.substring(0, 500));
-                        return;
-                    }
-
-                    console.log(`Found ${links.length} download links.`);
-                    const versionMatch = path.basename(links[0]).match(/QQ_([0-9.]+_[0-9.]+)/);
-                    const version = versionMatch ? versionMatch[1] : 'unknown';
-                    console.log(`Extracted version: ${version}`);
-                    fs.writeFileSync('version.txt', version);
-
-                    let linksMd = '### Official Download Links\n\n| Filename | Official URL |\n| :--- | :--- |\n';
-                    links.forEach(link => { linksMd += `| ${path.basename(link)} | [Download](${link}) |\n`; });
-                    fs.writeFileSync('links.md', linksMd);
-
-                    const downloadFolder = path.join(__dirname, 'downloads');
-                    if (!fs.existsSync(downloadFolder)) fs.mkdirSync(downloadFolder);
-
-                    for (const link of links) {
-                        await downloadFile(link, downloadFolder);
-                    }
-                    console.log('All downloads completed.');
-                } catch (error) {
-                    console.error('An error occurred:', error.message);
-                } finally {
-                    await browser.close();
-                }
-            })();
+        for (const link of links) {
+            await downloadFile(link, downloadFolder);
+        }
+        console.log('All downloads completed.');
+    } catch (error) {
+        console.error('An error occurred:', error.message);
+    } finally {
+        await browser.close();
+    }
+})();
