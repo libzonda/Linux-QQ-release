@@ -19,23 +19,50 @@ jobs:
 
       - name: Configure DNS and Hosts
         run: |
-          # Use Tencent DNS to resolve domestic nodes
-          # cdn-go.cn is the primary target for the config file
-          # We use a known-good domestic IP if nslookup fails or returns an overseas node
-          # (Overseas nodes often start with 150.x or 129.x etc. Domestic Tencent nodes are often 183.x, 113.x)
+          node -e "
+          const dns = require('dns');
+          const fs = require('fs');
+          const resolver = new dns.Resolver();
+          resolver.setServers(['119.29.29.29']);
           
-          RESOLVED_CDN_IP=$(nslookup cdn-go.cn 119.29.29.29 | awk '/^Address: / { print $2 }' | tail -n 1)
-          RESOLVED_IM_IP=$(nslookup im.qq.com 119.29.29.29 | awk '/^Address: / { print $2 }' | tail -n 1)
+          async function map(domain) {
+            return new Promise((resolve) => {
+              resolver.resolve4(domain, (err, addresses) => {
+                if (err || !addresses.length) {
+                  console.log('Failed to resolve ' + domain + ', using fallback');
+                  // Fallbacks for cdn-go.cn (Shenzhen) and im.qq.com
+                  const fallbacks = { 'cdn-go.cn': '183.60.209.130', 'im.qq.com': '113.108.81.189' };
+                  resolve(fallbacks[domain]);
+                } else {
+                  console.log('Resolved ' + domain + ' to ' + addresses[0]);
+                  resolve(addresses[0]);
+                }
+              });
+            });
+          }
+
+          async function run() {
+            const cdnIp = await map('cdn-go.cn');
+            const imIp = await map('im.qq.com');
+            const dlIp = await map('dldir1v6.qq.com');
+            const content = \`\n\${cdnIp} cdn-go.cn\n\${imIp} im.qq.com\n\${dlIp} dldir1v6.qq.com\n\`;
+            fs.appendFileSync('/etc/hosts', content);
+            console.log('Updated /etc/hosts with domestic nodes.');
+          }
+          run();
+          "
           
-          echo "Resolved cdn-go.cn as $RESOLVED_CDN_IP"
-          echo "Resolved im.qq.com as $RESOLVED_IM_IP"
-          
-          # Force mapping in /etc/hosts to bypass GHA default DNS
-          echo "$RESOLVED_CDN_IP cdn-go.cn" >> /etc/hosts
-          echo "$RESOLVED_IM_IP im.qq.com" >> /etc/hosts
-          
-          echo "/etc/hosts content:"
+          echo "Final /etc/hosts:"
           cat /etc/hosts
+
+      - name: Diagnostic Curl Config
+        run: |
+          echo "Testing direct curl with host mapping..."
+          CONFIG_CONTENT=$(curl -s -L "https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxConfig.js?debug=$(date +%s)")
+          echo "--- START CONFIG CONTENT (first 500 chars) ---"
+          echo "$CONFIG_CONTENT" | head -c 500
+          echo -e "\n--- END CONFIG CONTENT ---"
+          echo "DETECTED VERSION IN CURL: $(echo "$CONFIG_CONTENT" | grep -o '\"version\":\"[^\"]*\"' | head -n 1)"
 
       - name: Install dependencies
         run: npm install
