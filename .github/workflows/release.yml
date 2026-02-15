@@ -11,25 +11,17 @@ permissions:
 jobs:
   scrape-and-release:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.58.2-noble-amd64
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
       - name: Install dependencies
         run: npm install
 
-      - name: Install Playwright Browsers
-        run: npx playwright install chromium --with-deps
-
       - name: Run Scraper
-        run: node index.js
+        run: xvfb-run node index.js
 
       - name: Get Version
         id: get_version
