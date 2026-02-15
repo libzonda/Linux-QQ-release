@@ -17,6 +17,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Configure DNS and Hosts
+        run: |
+          # Use Tencent DNS to resolve domestic nodes
+          # cdn-go.cn is the primary target for the config file
+          # We use a known-good domestic IP if nslookup fails or returns an overseas node
+          # (Overseas nodes often start with 150.x or 129.x etc. Domestic Tencent nodes are often 183.x, 113.x)
+          
+          RESOLVED_CDN_IP=$(nslookup cdn-go.cn 119.29.29.29 | awk '/^Address: / { print $2 }' | tail -n 1)
+          RESOLVED_IM_IP=$(nslookup im.qq.com 119.29.29.29 | awk '/^Address: / { print $2 }' | tail -n 1)
+          
+          echo "Resolved cdn-go.cn as $RESOLVED_CDN_IP"
+          echo "Resolved im.qq.com as $RESOLVED_IM_IP"
+          
+          # Force mapping in /etc/hosts to bypass GHA default DNS
+          echo "$RESOLVED_CDN_IP cdn-go.cn" >> /etc/hosts
+          echo "$RESOLVED_IM_IP im.qq.com" >> /etc/hosts
+          
+          echo "/etc/hosts content:"
+          cat /etc/hosts
+
       - name: Install dependencies
         run: npm install
 
