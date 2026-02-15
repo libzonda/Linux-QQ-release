@@ -42,6 +42,15 @@ async function downloadFile(url, downloadFolder) {
     try {
         const timestamp = Date.now();
         const url = `https://im.qq.com/linuxqq/index.shtml?t=${timestamp}`;
+
+        // Intercept requests to linuxConfig.js and append cache-busting timestamp
+        await page.route('**/linuxConfig.js', route => {
+            const requestUrl = route.request().url();
+            const newUrl = `${requestUrl}${requestUrl.includes('?') ? '&' : '?'}t=${timestamp}`;
+            console.log(`Intercepted and cache-busting: ${newUrl}`);
+            route.continue({ url: newUrl });
+        });
+
         console.log(`Navigating to ${url}...`);
         await page.goto(url, { waitUntil: 'networkidle' });
 
