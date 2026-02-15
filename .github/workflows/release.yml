@@ -73,8 +73,6 @@ jobs:
           done < links.txt
 
       - name: Prepare Latest Files
-
-      - name: Prepare Latest Files
         run: |
           VERSION=${{ steps.fetch_config.outputs.VERSION }}
           mkdir -p latest_files
