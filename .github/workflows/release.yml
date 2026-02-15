@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   scrape-and-release:
@@ -152,3 +153,72 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Images
+        run: |
+          VERSION=${{ steps.fetch_config.outputs.VERSION }}
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/linuxqq"
+          GHCR_REPO="ghcr.io/${REPO_NAME}"
+
+          echo "VERSION=$VERSION"
+          echo "DOCKERHUB_REPO=$DOCKERHUB_REPO"
+          echo "GHCR_REPO=$GHCR_REPO"
+
+          # Only build Docker images for architectures supported by the base image
+          for DEB in downloads/*_amd64*.deb downloads/*_arm64*.deb; do
+            [ -f "$DEB" ] || continue
+
+            FILENAME=$(basename "$DEB")
+            echo "=== Processing $FILENAME ==="
+
+            # Extract architecture from filename
+            if echo "$FILENAME" | grep -q "amd64"; then
+              ARCH="amd64"
+            elif echo "$FILENAME" | grep -q "arm64"; then
+              ARCH="arm64"
+            else
+              echo "Skipping unknown arch: $FILENAME"
+              continue
+            fi
+
+            echo "Building Docker image for $ARCH..."
+
+            TAG_VERSION="${VERSION}-${ARCH}"
+            TAG_LATEST="latest-${ARCH}"
+
+            docker build \
+              --build-arg DEB_FILE="$DEB" \
+              -t "${DOCKERHUB_REPO}:${TAG_VERSION}" \
+              -t "${DOCKERHUB_REPO}:${TAG_LATEST}" \
+              -t "${GHCR_REPO}:${TAG_VERSION}" \
+              -t "${GHCR_REPO}:${TAG_LATEST}" \
+              .
+
+            echo "Pushing ${TAG_VERSION} and ${TAG_LATEST}..."
+            docker push "${DOCKERHUB_REPO}:${TAG_VERSION}"
+            docker push "${DOCKERHUB_REPO}:${TAG_LATEST}"
+            docker push "${GHCR_REPO}:${TAG_VERSION}"
+            docker push "${GHCR_REPO}:${TAG_LATEST}"
+
+            echo "=== Done: $ARCH ==="
+          done
+
+          echo "All Docker images built and pushed."
