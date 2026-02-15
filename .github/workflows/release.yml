@@ -48,6 +48,15 @@ jobs:
             cp "$file" "latest_files/$new_filename"
           done
 
+      - name: Read Release Body
+        id: release_body
+        run: |
+          {
+            echo 'BODY_CONTENT<<EOF'
+            cat links.md
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
       - name: Check if release exists
         id: check_release
         run: |
@@ -73,6 +82,8 @@ jobs:
           body: |
             Automatically scraped latest Linux QQ installers.
             Version: ${{ steps.get_version.outputs.VERSION }}
+
+            ${{ steps.release_body.outputs.BODY_CONTENT }}
           draft: false
           prerelease: false
         env:

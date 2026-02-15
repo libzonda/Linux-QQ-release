@@ -74,6 +74,16 @@ async function downloadFile(url, downloadFolder) {
         console.log(`Extracted version: ${version}`);
         fs.writeFileSync('version.txt', version);
 
+        // Generate links.md for GitHub Release body
+        let linksMd = '### Official Download Links\n\n';
+        linksMd += '| Filename | Official URL |\n';
+        linksMd += '| :--- | :--- |\n';
+        links.forEach(link => {
+            const name = path.basename(link);
+            linksMd += `| ${name} | [Download](${link}) |\n`;
+        });
+        fs.writeFileSync('links.md', linksMd);
+
         const downloadFolder = path.join(__dirname, 'downloads');
         if (!fs.existsSync(downloadFolder)) {
             fs.mkdirSync(downloadFolder);
