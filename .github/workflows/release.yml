@@ -11,78 +11,76 @@ permissions:
 jobs:
   scrape-and-release:
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/playwright:v1.58.2-noble-amd64
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure DNS and Hosts
+      - name: Configure DNS and Fetch Config
+        id: fetch_config
         run: |
-          node -e "
-          const dns = require('dns');
-          const fs = require('fs');
-          const resolver = new dns.Resolver();
-          resolver.setServers(['119.29.29.29']);
+          # Robust DNS resolution using Tencent DNS
+          CDN_IP=$(nslookup cdn-go.cn 119.29.29.29 | grep -A 1 "Non-authoritative answer" | grep "Address" | head -n 1 | awk '{print $2}')
+          IM_IP=$(nslookup im.qq.com 119.29.29.29 | grep -A 1 "Non-authoritative answer" | grep "Address" | head -n 1 | awk '{print $2}')
+          DL_IP=$(nslookup dldir1v6.qq.com 119.29.29.29 | grep -A 1 "Non-authoritative answer" | grep "Address" | head -n 1 | awk '{print $2}')
           
-          async function map(domain) {
-            return new Promise((resolve) => {
-              resolver.resolve4(domain, (err, addresses) => {
-                if (err || !addresses.length) {
-                  console.log('Failed to resolve ' + domain + ', using fallback');
-                  // Fallbacks for cdn-go.cn (Shenzhen) and im.qq.com
-                  const fallbacks = { 'cdn-go.cn': '183.60.209.130', 'im.qq.com': '113.108.81.189' };
-                  resolve(fallbacks[domain]);
-                } else {
-                  console.log('Resolved ' + domain + ' to ' + addresses[0]);
-                  resolve(addresses[0]);
-                }
-              });
-            });
-          }
-
-          async function run() {
-            const cdnIp = await map('cdn-go.cn');
-            const imIp = await map('im.qq.com');
-            const dlIp = await map('dldir1v6.qq.com');
-            const content = \`\n\${cdnIp} cdn-go.cn\n\${imIp} im.qq.com\n\${dlIp} dldir1v6.qq.com\n\`;
-            fs.appendFileSync('/etc/hosts', content);
-            console.log('Updated /etc/hosts with domestic nodes.');
-          }
-          run();
-          "
+          echo "Settings hosts..."
+          sudo echo "$CDN_IP cdn-go.cn" | sudo tee -a /etc/hosts
+          sudo echo "$IM_IP im.qq.com" | sudo tee -a /etc/hosts
+          sudo echo "$DL_IP dldir1v6.qq.com" | sudo tee -a /etc/hosts
           
-          echo "Final /etc/hosts:"
-          cat /etc/hosts
+          echo "Fetching linuxConfig.js directly..."
+          # Use a random param to bust server-side cache
+          T=$(date +%s)
+          # Use X-Forwarded-For just in case as an additional hint for domestic routing
+          CONFIG_URL="https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxConfig.js?t=$T"
+          echo "URL: $CONFIG_URL"
+          
+          curl -s -L -H "X-Forwarded-For: 183.60.209.130" "$CONFIG_URL" -o linuxConfig.js
+          
+          echo "--- Content Preview ---"
+          head -c 200 linuxConfig.js
+          echo -e "\n--- End Preview ---"
+          
+          VERSION=$(grep -o '"version":"[^"]*"' linuxConfig.js | head -n 1 | cut -d'"' -f4)
+          echo "Detected Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "$VERSION" > version.txt
+          
+          # Extract all download URLs
+          grep -o 'https://dldir1v6.qq.com/[^"]*' linuxConfig.js | sort | uniq > links.txt
+          
+          echo "Links found:"
+          cat links.txt
+          
+          # Prepare links.md for release body
+          echo "### Official Download Links" > links.md
+          echo "" >> links.md
+          echo "| Filename | Official URL |" >> links.md
+          echo "| :--- | :--- |" >> links.md
+          while read -r link; do
+            filename=$(basename "$link")
+            echo "| $filename | [Download]($link) |" >> links.md
+          done < links.txt
 
-      - name: Diagnostic Curl Config
+      - name: Download Installers
         run: |
-          echo "Testing direct curl with host mapping..."
-          CONFIG_CONTENT=$(curl -s -L "https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/linuxConfig.js?debug=$(date +%s)")
-          echo "--- START CONFIG CONTENT (first 500 chars) ---"
-          echo "$CONFIG_CONTENT" | head -c 500
-          echo -e "\n--- END CONFIG CONTENT ---"
-          echo "DETECTED VERSION IN CURL: $(echo "$CONFIG_CONTENT" | grep -o '\"version\":\"[^\"]*\"' | head -n 1)"
+          mkdir -p downloads
+          while read -r link; do
+            filename=$(basename "$link")
+            echo "Downloading $filename..."
+            curl -L "$link" -o "downloads/$filename"
+          done < links.txt
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Scraper
-        run: xvfb-run node index.js
-
-      - name: Get Version
-        id: get_version
-        run: echo "VERSION=$(cat version.txt)" >> $GITHUB_OUTPUT
+      - name: Prepare Latest Files
 
       - name: Prepare Latest Files
         run: |
-          VERSION=${{ steps.get_version.outputs.VERSION }}
+          VERSION=${{ steps.fetch_config.outputs.VERSION }}
           mkdir -p latest_files
           for file in downloads/*; do
             filename=$(basename "$file")
             # Robustly replace the version_build part with "latest"
-            # Pattern: QQ_VERSION_BUILD_ARCH_PATCH.EXT -> QQ_latest_ARCH_PATCH.EXT
-            # We use a regex that identifies the architecture part to correctly split the string
             new_filename=$(echo "$filename" | sed -E 's/^QQ_.*_(amd64|x86_64|arm64|aarch64|loongarch64|mips64el)(_[0-9]+)\.(deb|rpm|AppImage)$/QQ_latest_\1\2.\3/')
             cp "$file" "latest_files/$new_filename"
           done
@@ -99,7 +97,7 @@ jobs:
       - name: Check if release exists
         id: check_release
         run: |
-          VERSION=${{ steps.get_version.outputs.VERSION }}
+          VERSION=${{ steps.fetch_config.outputs.VERSION }}
           if gh release view "$VERSION" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Release $VERSION already exists. Skipping."
@@ -113,14 +111,14 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          name: Linux QQ ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ steps.fetch_config.outputs.VERSION }}
+          name: Linux QQ ${{ steps.fetch_config.outputs.VERSION }}
           files: |
             downloads/*
             latest_files/*
           body: |
             Automatically scraped latest Linux QQ installers.
-            Version: ${{ steps.get_version.outputs.VERSION }}
+            Version: ${{ steps.fetch_config.outputs.VERSION }}
 
             ${{ steps.release_body.outputs.BODY_CONTENT }}
           draft: false
