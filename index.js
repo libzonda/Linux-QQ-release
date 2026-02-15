@@ -36,7 +36,25 @@ async function downloadFile(url, downloadFolder) {
 
 (async () => {
     const browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext();
+    const context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        viewport: { width: 1920, height: 1080 },
+        deviceScaleFactor: 1,
+        locale: 'zh-CN',
+        timezoneId: 'Asia/Shanghai',
+        extraHTTPHeaders: {
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'DNT': '1',
+        }
+    });
+
+    // Stealth: Add init script to mask automation
+    await context.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh'] });
+        Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+    });
+
     const page = await context.newPage();
 
     try {
