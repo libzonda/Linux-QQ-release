@@ -28,6 +28,12 @@ async function downloadFile(url, downloadFolder) {
         viewport: { width: 1920, height: 1080 },
         locale: 'zh-CN',
         timezoneId: 'Asia/Shanghai',
+        extraHTTPHeaders: {
+            'X-Forwarded-For': '183.60.209.130', // Force domestic (Shenzhen) IP hint
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        }
     });
 
     await context.addInitScript(() => {
