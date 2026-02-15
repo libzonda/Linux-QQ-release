@@ -1,0 +1,74 @@
+const { chromium } = require('playwright');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
+async function downloadFile(url, downloadFolder) {
+    try {
+        const fileName = path.basename(url);
+        const filePath = path.join(downloadFolder, fileName);
+        
+        console.log(`Downloading ${fileName}...`);
+        
+        const response = await axios({
+            method: 'GET',
+            url: url,
+            responseType: 'stream'
+        });
+
+        const writer = fs.createWriteStream(filePath);
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on('finish', () => {
+                console.log(`Successfully downloaded ${fileName}`);
+                resolve();
+            });
+            writer.on('error', (err) => {
+                console.error(`Failed to download ${fileName}:`, err.message);
+                reject(err);
+            });
+        });
+    } catch (error) {
+        console.error(`Error downloading from ${url}:`, error.message);
+    }
+}
+
+(async () => {
+    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    try {
+        console.log('Navigating to https://im.qq.com/linuxqq/index.shtml...');
+        await page.goto('https://im.qq.com/linuxqq/index.shtml', { waitUntil: 'networkidle' });
+
+        // Select all download links based on the provided selector
+        console.log('Locating download links...');
+        const links = await page.$$eval('div#id-download-area div.down-btn a', anchors => 
+            anchors.map(a => a.href).filter(href => href && href.startsWith('http'))
+        );
+
+        if (links.length === 0) {
+            console.log('No download links found. Please check the selectors.');
+            return;
+        }
+
+        console.log(`Found ${links.length} download links.`);
+
+        const downloadFolder = path.join(__dirname, 'downloads');
+        if (!fs.existsSync(downloadFolder)) {
+            fs.mkdirSync(downloadFolder);
+        }
+
+        for (const link of links) {
+            await downloadFile(link, downloadFolder);
+        }
+
+        console.log('All downloads completed.');
+    } catch (error) {
+        console.error('An error occurred during execution:', error);
+    } finally {
+        await browser.close();
+    }
+})();
