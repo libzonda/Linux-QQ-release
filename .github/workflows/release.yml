@@ -63,14 +63,43 @@ jobs:
             echo "| $filename | [Download]($link) |" >> links.md
           done < links.txt
 
+      - name: Install aria2
+        run: sudo apt-get update && sudo apt-get install -y aria2
+
       - name: Download Installers
         run: |
           mkdir -p downloads
+          # aria2 input file: each URL followed by output options
+          > aria2_input.txt
           while read -r link; do
             filename=$(basename "$link")
-            echo "Downloading $filename..."
-            curl -L "$link" -o "downloads/$filename"
+            echo "$link" >> aria2_input.txt
+            echo "  dir=downloads" >> aria2_input.txt
+            echo "  out=$filename" >> aria2_input.txt
           done < links.txt
+
+          echo "--- aria2 input file ---"
+          cat aria2_input.txt
+          echo "--- Starting parallel downloads ---"
+
+          # -x16: 16 connections per file
+          # -s16: split each file into 16 segments
+          # -j$(wc -l < links.txt): download all files concurrently
+          # -k1M: minimum split size 1MB
+          # --file-allocation=none: no pre-allocation for speed
+          JOBS=$(wc -l < links.txt)
+          aria2c \
+            --input-file=aria2_input.txt \
+            --max-connection-per-server=16 \
+            --split=16 \
+            --min-split-size=1M \
+            --max-concurrent-downloads=$JOBS \
+            --file-allocation=none \
+            --console-log-level=notice \
+            --summary-interval=5
+
+          echo "--- Download complete ---"
+          ls -lh downloads/
 
       - name: Prepare Latest Files
         run: |
