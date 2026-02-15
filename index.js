@@ -59,7 +59,9 @@ async function downloadFile(url, downloadFolder) {
         // Extract version from the first link (e.g., QQ_3.2.25_260205_amd64_01.deb -> 3.2.25_260205)
         const firstLink = links[0];
         const fileName = path.basename(firstLink);
-        const versionMatch = fileName.match(/QQ_(.*?)_/);
+        // Match everything from QQ_ until the architecture part begins (assuming arch part is after the version_build part)
+        // A more robust way: capture the first two segments after QQ_
+        const versionMatch = fileName.match(/QQ_([0-9.]+_[0-9.]+)/);
         const version = versionMatch ? versionMatch[1] : 'unknown';
         console.log(`Extracted version: ${version}`);
         fs.writeFileSync('version.txt', version);

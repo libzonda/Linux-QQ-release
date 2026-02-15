@@ -41,9 +41,10 @@ jobs:
           mkdir -p latest_files
           for file in downloads/*; do
             filename=$(basename "$file")
-            # Replace the version string with "latest"
-            # Example: QQ_3.2.25_260205_amd64_01.deb -> QQ_latest_amd64_01.deb
-            new_filename=$(echo "$filename" | sed "s/$VERSION/latest/")
+            # Robustly replace the version_build part with "latest"
+            # Pattern: QQ_VERSION_BUILD_ARCH_PATCH.EXT -> QQ_latest_ARCH_PATCH.EXT
+            # We use a regex that identifies the architecture part to correctly split the string
+            new_filename=$(echo "$filename" | sed -E 's/^QQ_.*_(amd64|x86_64|arm64|aarch64|loongarch64|mips64el)(_[0-9]+)\.(deb|rpm|AppImage)$/QQ_latest_\1\2.\3/')
             cp "$file" "latest_files/$new_filename"
           done
 
