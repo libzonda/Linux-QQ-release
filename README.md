@@ -23,10 +23,10 @@ You can download the latest installer using `curl` or `wget`. Replace `<VERSION>
 **Example (x86_64 .deb):**
 ```bash
 # Using curl (follow redirects with -L)
-curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_3.2.25_260205_amd64_01.deb
+curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
 
 # Using wget
-wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_3.2.25_260205_amd64_01.deb
+wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
 ```
 
 

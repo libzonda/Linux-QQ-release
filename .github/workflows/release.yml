@@ -35,6 +35,18 @@ jobs:
         id: get_version
         run: echo "VERSION=$(cat version.txt)" >> $GITHUB_OUTPUT
 
+      - name: Prepare Latest Files
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          mkdir -p latest_files
+          for file in downloads/*; do
+            filename=$(basename "$file")
+            # Replace the version string with "latest"
+            # Example: QQ_3.2.25_260205_amd64_01.deb -> QQ_latest_amd64_01.deb
+            new_filename=$(echo "$filename" | sed "s/$VERSION/latest/")
+            cp "$file" "latest_files/$new_filename"
+          done
+
       - name: Check if release exists
         id: check_release
         run: |
@@ -54,7 +66,9 @@ jobs:
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
           name: Linux QQ ${{ steps.get_version.outputs.VERSION }}
-          files: downloads/*
+          files: |
+            downloads/*
+            latest_files/*
           body: |
             Automatically scraped latest Linux QQ installers.
             Version: ${{ steps.get_version.outputs.VERSION }}

@@ -23,10 +23,10 @@
 **示例 (x86_64 .deb):**
 ```bash
 # 使用 curl (请务必使用 -L 跟随重定向)
-curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_3.2.25_260205_amd64_01.deb
+curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
 
 # 使用 wget
-wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_3.2.25_260205_amd64_01.deb
+wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
 ```
 
 
