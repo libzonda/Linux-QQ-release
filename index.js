@@ -40,14 +40,22 @@ async function downloadFile(url, downloadFolder) {
     const page = await context.newPage();
 
     try {
-        console.log('Navigating to https://im.qq.com/linuxqq/index.shtml...');
-        await page.goto('https://im.qq.com/linuxqq/index.shtml', { waitUntil: 'networkidle' });
+        const timestamp = Date.now();
+        const url = `https://im.qq.com/linuxqq/index.shtml?t=${timestamp}`;
+        console.log(`Navigating to ${url}...`);
+        await page.goto(url, { waitUntil: 'networkidle' });
+
+        // Wait a bit more for the JS to execute and populate the links
+        console.log('Waiting for download links to populate...');
+        await page.waitForTimeout(3000);
 
         // Select all download links based on the provided selector
         console.log('Locating download links...');
         const links = await page.$$eval('div#id-download-area div.down-btn a', anchors =>
-            anchors.map(a => a.href).filter(href => href && href.startsWith('http'))
+            anchors.map(a => a.href).filter(href => href && (href.startsWith('http') || href.endsWith('.deb') || href.endsWith('.rpm') || href.endsWith('.AppImage')))
         );
+
+        console.log('Links found:', JSON.stringify(links, null, 2));
 
         if (links.length === 0) {
             console.log('No download links found. Please check the selectors.');
