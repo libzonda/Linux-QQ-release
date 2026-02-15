@@ -7,9 +7,9 @@ async function downloadFile(url, downloadFolder) {
     try {
         const fileName = path.basename(url);
         const filePath = path.join(downloadFolder, fileName);
-        
+
         console.log(`Downloading ${fileName}...`);
-        
+
         const response = await axios({
             method: 'GET',
             url: url,
@@ -45,7 +45,7 @@ async function downloadFile(url, downloadFolder) {
 
         // Select all download links based on the provided selector
         console.log('Locating download links...');
-        const links = await page.$$eval('div#id-download-area div.down-btn a', anchors => 
+        const links = await page.$$eval('div#id-download-area div.down-btn a', anchors =>
             anchors.map(a => a.href).filter(href => href && href.startsWith('http'))
         );
 
@@ -55,6 +55,14 @@ async function downloadFile(url, downloadFolder) {
         }
 
         console.log(`Found ${links.length} download links.`);
+
+        // Extract version from the first link (e.g., QQ_3.2.25_260205_amd64_01.deb -> 3.2.25_260205)
+        const firstLink = links[0];
+        const fileName = path.basename(firstLink);
+        const versionMatch = fileName.match(/QQ_(.*?)_/);
+        const version = versionMatch ? versionMatch[1] : 'unknown';
+        console.log(`Extracted version: ${version}`);
+        fs.writeFileSync('version.txt', version);
 
         const downloadFolder = path.join(__dirname, 'downloads');
         if (!fs.existsSync(downloadFolder)) {
