@@ -200,24 +200,20 @@ jobs:
               continue
             fi
 
-            echo "Building Docker image for $ARCH..."
+            echo "Building and pushing Docker image for $ARCH..."
 
             TAG_VERSION="${VERSION}-${ARCH}"
             TAG_LATEST="latest-${ARCH}"
 
-            docker build \
+            docker buildx build \
               --build-arg DEB_FILE="$DEB" \
               -t "${DOCKERHUB_REPO}:${TAG_VERSION}" \
               -t "${DOCKERHUB_REPO}:${TAG_LATEST}" \
               -t "${GHCR_REPO}:${TAG_VERSION}" \
               -t "${GHCR_REPO}:${TAG_LATEST}" \
+              --platform "linux/${ARCH}" \
+              --push \
               .
-
-            echo "Pushing ${TAG_VERSION} and ${TAG_LATEST}..."
-            docker push "${DOCKERHUB_REPO}:${TAG_VERSION}"
-            docker push "${DOCKERHUB_REPO}:${TAG_LATEST}"
-            docker push "${GHCR_REPO}:${TAG_VERSION}"
-            docker push "${GHCR_REPO}:${TAG_LATEST}"
 
             echo "=== Done: $ARCH ==="
           done
