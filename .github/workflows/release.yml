@@ -174,9 +174,10 @@ jobs:
         run: |
           VERSION=${{ steps.fetch_config.outputs.VERSION }}
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/linuxqq"
-          GHCR_REPO="ghcr.io/${REPO_NAME}"
+          REPO_FULL_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=$(echo "$REPO_FULL_NAME" | cut -d'/' -f2)
+          DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}"
+          GHCR_REPO="ghcr.io/${REPO_FULL_NAME}"
 
           echo "VERSION=$VERSION"
           echo "DOCKERHUB_REPO=$DOCKERHUB_REPO"
