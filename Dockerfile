@@ -5,12 +5,25 @@ ARG DEB_FILE
 # Copy the .deb installer
 COPY ${DEB_FILE} /tmp/qq.deb
 
-# Install QQ and its dependencies
+# Install QQ and its dependencies, plus locales and fonts
 RUN apt-get update && \
+    apt-get install -y \
+      locales \
+      dbus \
+      libayatana-appindicator3-dev \
+      libkeybinder-3.0-dev \
+      fonts-noto-cjk \
+      fonts-wqy-zenhei \
+      fonts-wqy-microhei && \
+    locale-gen zh_CN.UTF-8 en_US.UTF-8 && \
+    update-locale LANG=zh_CN.UTF-8 && \
     apt-get install -y /tmp/qq.deb || true && \
     apt-get install -f -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/qq.deb
+
+ENV LANG=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
 
 # Copy the start script
 COPY startapp.sh /startapp.sh
