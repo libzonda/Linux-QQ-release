@@ -18,7 +18,8 @@ RUN --mount=type=bind,source=${DEB_FILE},target=/tmp/qq.deb \
         dbus \
         fonts-wqy-zenhei \
         libayatana-appindicator3-1 \
-        libkeybinder-3.0-0 && \
+        libkeybinder-3.0-0 \
+        desktop-file-utils && \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
@@ -27,7 +28,7 @@ RUN --mount=type=bind,source=${DEB_FILE},target=/tmp/qq.deb \
     # General cleanup
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/log/*
+    rm -rf /var/lib/apt/lists/* /var/log/*
     
 # Copy the start script
 COPY startapp.sh /startapp.sh
