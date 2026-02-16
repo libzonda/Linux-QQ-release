@@ -223,3 +223,11 @@ jobs:
           done
 
           echo "All Docker images built and pushed."
+
+      - name: Update Docker Hub Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/linux-qq-release
+          readme-filepath: ./DOCKERHUB.md
