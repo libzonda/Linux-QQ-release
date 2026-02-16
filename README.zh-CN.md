@@ -1,4 +1,4 @@
-# Linux QQ Release Automation (简体中文)
+# Linux QQ Release (简体中文)
 
 [English](./README.md)
 
@@ -23,11 +23,12 @@
 **示例 (x86_64 .deb):**
 ```bash
 # 使用 curl (请务必使用 -L 跟随重定向)
-curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
+curl -L -O https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_latest_amd64_01.deb
 
 # 使用 wget
-wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
+wget https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_latest_amd64_01.deb
 ```
+
 
 ## Docker 使用
 

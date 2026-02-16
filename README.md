@@ -1,4 +1,4 @@
-# Linux QQ Release Automation
+# Linux QQ Release
 
 [简体中文](./README.zh-CN.md)
 
@@ -26,7 +26,7 @@ You can download the latest installer using `curl` or `wget`. Replace `<VERSION>
 curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
 
 # Using wget
-wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
+wget https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_latest_amd64_01.deb
 ```
 
 ## Docker Usage
