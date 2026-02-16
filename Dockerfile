@@ -12,6 +12,7 @@ ENV LANG=zh_CN.UTF-8 \
 # We use --mount=type=bind to access the .deb installer without copying it into a layer
 RUN --mount=type=bind,source=${DEB_FILE},target=/tmp/qq.deb \
     apt-get update && \
+    # Install base dependencies
     apt-get install -y --no-install-recommends \
         locales \
         dbus \
@@ -21,22 +22,13 @@ RUN --mount=type=bind,source=${DEB_FILE},target=/tmp/qq.deb \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    # Install QQ
-    dpkg -i /tmp/qq.deb || apt-get install -y --no-install-recommends -f && \
-    # Aggressive cleanup
+    # Install QQ directly with apt-get (handles local file + dependencies)
+    apt-get install -y --no-install-recommends /tmp/qq.deb && \
+    # General cleanup
     apt-get autoremove -y && \
     apt-get clean && \
-    # Remove documentation, manpages, and unnecessary locales
-    find /usr/share/doc -depth -type f ! -name copyright -delete && \
-    find /usr/share/doc -empty -delete && \
-    rm -rf /usr/share/man/* /usr/share/info/* /usr/share/lintian/* /usr/share/linda/* /var/cache/man/* && \
-    # Prune locales: keep only zh_CN and en_US
-    find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'zh_CN' ! -name 'en_US' ! -name 'en' -exec rm -rf {} + && \
-    rm -rf /var/lib/apt/lists/* \
-           /var/cache/apt/* \
-           /tmp/* \
-           /var/log/*
-
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/log/*
+    
 # Copy the start script
 COPY startapp.sh /startapp.sh
 
