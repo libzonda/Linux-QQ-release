@@ -7,18 +7,17 @@ COPY ${DEB_FILE} /tmp/qq.deb
 
 # Install QQ and its dependencies, plus locales and fonts
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
       locales \
       dbus \
-      libayatana-appindicator3-dev \
-      libkeybinder-3.0-dev \
-      fonts-noto-cjk \
+      libayatana-appindicator3-1 \
+      libkeybinder-3.0-0 \
       fonts-wqy-zenhei \
       fonts-wqy-microhei && \
     locale-gen zh_CN.UTF-8 en_US.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    apt-get install -y /tmp/qq.deb || true && \
-    apt-get install -f -y && \
+    apt-get install -y --no-install-recommends /tmp/qq.deb || true && \
+    apt-get install -f -y --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/qq.deb
 
