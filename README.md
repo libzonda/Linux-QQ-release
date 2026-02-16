@@ -61,6 +61,27 @@ docker run -d \
 
 Open your browser and visit `http://localhost:5800`.
 
+### Using Docker Compose
+
+1. Create a `docker-compose.yml` file:
+
+```yaml
+services:
+  linuxqq:
+    image: ghcr.io/libzonda/linux-qq-release:latest-amd64
+    container_name: linuxqq
+    restart: unless-stopped
+    ports:
+      - "5800:5800"
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Asia/Shanghai
+```
+
+2. Run with command: `docker-compose up -d`
+
+
 
 
 ---

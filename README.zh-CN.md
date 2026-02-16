@@ -62,6 +62,27 @@ docker run -d \
 
 打开浏览器访问 `http://localhost:5800` 即可。
 
+### 使用 Docker Compose
+
+1. 创建 `docker-compose.yml` 文件：
+
+```yaml
+services:
+  linuxqq:
+    image: ghcr.io/libzonda/linux-qq-release:latest-amd64
+    container_name: linuxqq
+    restart: unless-stopped
+    ports:
+      - "5800:5800"
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Asia/Shanghai
+```
+
+2. 运行命令：`docker-compose up -d`
+
+
 
 
 ---

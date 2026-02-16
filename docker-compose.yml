@@ -1,0 +1,15 @@
+services:
+  linuxqq:
+    image: ghcr.io/libzonda/linux-qq-release:latest-amd64
+    container_name: linuxqq
+    restart: unless-stopped
+    ports:
+      - "5800:5800" # Web GUI (noVNC)
+      - "5900:5900" # VNC Client
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Asia/Shanghai
+      - KEEP_APP_RUNNING=1
+      - ENABLE_CJK_FONT=1
+      # - VNC_PASSWORD=secret  # Optional: set VNC password
