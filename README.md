@@ -29,6 +29,39 @@ curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download
 wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
 ```
 
+## Docker Usage
+
+You can also run Linux QQ in a Docker container with a web-based GUI (noVNC).
+
+### Features
+*   **Web GUI**: Access QQ via browser at `http://localhost:5800`
+*   **Chinese Support**: Built-in Chinese fonts (`Noto Sans CJK`, `WenQuanYi`) and input method support
+*   **Multi-Arch**: Supports `amd64` and `arm64`
+
+### Quick Start
+
+**Run from Docker Hub:**
+```bash
+# Replace <user> with the actual namespace (e.g., libzonda)
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  libzonda/linux-qq-release:latest-amd64
+```
+
+**Run from GHCR:**
+```bash
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  ghcr.io/libzonda/linux-qq-release:latest-amd64
+```
+
+Open your browser and visit `http://localhost:5800`.
+
+
 
 ---
 *Disclaimer: This project is for automated archiving purposes only. The copyright of the installation packages belongs to Tencent.*

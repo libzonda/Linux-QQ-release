@@ -29,6 +29,39 @@ curl -L -O https://github.com/libzonda/Linux-QQ-release/releases/latest/download
 wget https://github.com/libzonda/Linux-QQ-release/releases/latest/download/QQ_latest_amd64_01.deb
 ```
 
+## Docker 使用
+
+本项目还提供了 Docker 镜像，让你可以在容器中通过 Web 界面 (noVNC) 运行 Linux QQ。
+
+### 特性
+*   **Web GUI**: 通过浏览器访问 QQ，默认地址 `http://localhost:5800`
+*   **中文支持**: 内置 `Noto Sans CJK` 和 `文泉驿` 字体，支持中文输入
+*   **多架构**: 支持 `amd64` 和 `arm64`
+
+### 快速开始
+
+**从 Docker Hub 运行:**
+```bash
+# 请将 <user> 替换为实际的命名空间 (例如 libzonda)
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  libzonda/linux-qq-release:latest-amd64
+```
+
+**从 GHCR 运行:**
+```bash
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  ghcr.io/libzonda/linux-qq-release:latest-amd64
+```
+
+打开浏览器访问 `http://localhost:5800` 即可。
+
+
 
 ---
 *声明：本项目仅用于自动化归档，安装包版权归腾讯公司所有。*
