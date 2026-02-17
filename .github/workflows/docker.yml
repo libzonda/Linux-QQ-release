@@ -55,9 +55,9 @@ jobs:
         id: determine_filename
         run: |
           if [ "${{ matrix.arch }}" == "amd64" ]; then
-            echo "PATTERN=*amd64.deb" >> $GITHUB_OUTPUT
+            echo "PATTERN=*amd64*.deb" >> $GITHUB_OUTPUT
           elif [ "${{ matrix.arch }}" == "arm64" ]; then
-            echo "PATTERN=*arm64.deb" >> $GITHUB_OUTPUT
+            echo "PATTERN=*arm64*.deb" >> $GITHUB_OUTPUT
           fi
 
       - name: Download Release Assets
