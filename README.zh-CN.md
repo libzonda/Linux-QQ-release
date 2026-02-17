@@ -1,5 +1,13 @@
 # Linux QQ Release (简体中文)
 
+[![GitHub Release](https://img.shields.io/github/v/release/libzonda/Linux-QQ-release?style=flat-square)](https://github.com/libzonda/Linux-QQ-release/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/libzonda/Linux-QQ-release?style=flat-square)](https://github.com/libzonda/Linux-QQ-release/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/libzonda/Linux-QQ-release?style=flat-square)](https://github.com/libzonda/Linux-QQ-release/network/members)
+[![Docker Pulls](https://img.shields.io/docker/pulls/libzonda/linux-qq-release?style=flat-square)](https://hub.docker.com/r/libzonda/linux-qq-release)
+[![Docker Image Size](https://img.shields.io/docker/image-size/libzonda/linux-qq-release/latest-amd64?style=flat-square)](https://hub.docker.com/r/libzonda/linux-qq-release)
+[![License](https://img.shields.io/github/license/libzonda/Linux-QQ-release?style=flat-square)](./LICENSE)
+[![Platform](https://img.shields.io/badge/platform-linux%2Famd64%20%7C%20linux%2Farm64-blue?style=flat-square)](https://hub.docker.com/r/libzonda/linux-qq-release)
+
 [English](./README.md)
 
 ## 项目简介
