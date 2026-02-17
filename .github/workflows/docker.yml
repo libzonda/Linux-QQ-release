@@ -90,6 +90,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Determine Image Name
+        id: image_name
+        run: |
+          # Convert repository name to lowercase
+          REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_OUTPUT
+          
+          # Convert owner to lowercase
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "REPO_OWNER=$REPO_OWNER" >> $GITHUB_OUTPUT
+
       - name: Build and Push Docker Images
         uses: docker/build-push-action@v5
         with:
@@ -100,10 +111,10 @@ jobs:
           build-args: |
              IMAGE_FILE=downloads/*.AppImage
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest-${{ matrix.arch }}
-            ghcr.io/${{ github.repository }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
-            ghcr.io/${{ github.repository }}:latest-${{ matrix.arch }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.image_name.outputs.REPO_NAME }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.image_name.outputs.REPO_NAME }}:latest-${{ matrix.arch }}
+            ghcr.io/${{ steps.image_name.outputs.REPO_OWNER }}/${{ steps.image_name.outputs.REPO_NAME }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
+            ghcr.io/${{ steps.image_name.outputs.REPO_OWNER }}/${{ steps.image_name.outputs.REPO_NAME }}:latest-${{ matrix.arch }}
           cache-from: type=gha,scope=${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
 
