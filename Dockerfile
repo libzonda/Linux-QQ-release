@@ -14,6 +14,7 @@ ENV LANG=zh_CN.UTF-8 \
 RUN apt-get update && \
     # Install base dependencies and Electron/QQ runtime deps
     apt-get install -y --no-install-recommends \
+        ca-certificates \
         software-properties-common \
         locales \
         dbus \

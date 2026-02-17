@@ -33,9 +33,12 @@ echo "Starting $QQ_INSTANCE_COUNT instance(s) of QQ..."
 i=2
 while [ "$i" -le "$QQ_INSTANCE_COUNT" ]; do
     echo "Starting QQ instance $i..."
-    "$BINARY" --no-sandbox &
+    # Isolate user data to prevent white screen/crashes
+    # Default user data is in ~/.config/QQ
+    DATA_DIR="$HOME/.config/QQ_$i"
+    "$BINARY" --no-sandbox --user-data-dir="$DATA_DIR" &
     i=$((i + 1))
-    sleep 2
+    sleep 5
 done
 
 echo "Starting main QQ instance..."
