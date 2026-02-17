@@ -34,6 +34,7 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
     # Extract AppImage using 7-Zip (robustly handles headers and SquashFS)
     # 7z will extract the SquashFS contents directly to the target directory
     7z x /tmp/app.AppImage -o/opt/QQ && \
+    chmod -R +x /opt/QQ && \
     # General cleanup
     apt-get autoremove -y && \
     apt-get clean && \
