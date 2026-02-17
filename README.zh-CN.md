@@ -97,7 +97,7 @@ services:
 | `TZ` | `UTC` | 时区设置 (例如 `Asia/Shanghai`)。 |
 | `QQ_INSTANCE_COUNT` | `1` | 启动的 QQ 实例数量。 |
 | `KEEP_APP_RUNNING` | `0` | 设置为 `1` 可在应用崩溃时自动重启。 |
-| `VNC_PASSWORD` | (未设置) | VNC 访问密码。 |
+| `VNC_PASSWORD` | (未设置) | 访问图形界面的密码。**强烈建议**设置此项以保证安全。 |
 | `ENABLE_CJK_FONT` | `1` | 启用中文字体 (默认开启)。 |
 
 #### 存储卷
