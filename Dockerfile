@@ -22,7 +22,7 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
         # Electron/QQ runtime deps
         libnss3 \
         libgbm1 \
-        libasound2 \
+        libasound2t64 \
         libgtk-3-0 \
         libxss1 \
         libxtst6 \
