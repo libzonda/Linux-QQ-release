@@ -50,7 +50,8 @@ RUN echo '#!/bin/sh' > /usr/local/bin/firefox && \
     echo 'export MOZ_DISABLE_CONTENT_SANDBOX=1' >> /usr/local/bin/firefox && \
     echo 'export MOZ_DISABLE_GMP_SANDBOX=1' >> /usr/local/bin/firefox && \
     echo 'export MOZ_DISABLE_RDD_SANDBOX=1' >> /usr/local/bin/firefox && \
-    echo 'exec /usr/bin/firefox "$@"' >> /usr/local/bin/firefox && \
+    echo 'export MOZ_DISABLE_setuid_sandbox=1' >> /usr/local/bin/firefox && \
+    echo 'exec /usr/bin/firefox --no-sandbox --disable-setuid-sandbox "$@"' >> /usr/local/bin/firefox && \
     chmod +x /usr/local/bin/firefox
 
 # Install QQ from DEB (Application Layer)
