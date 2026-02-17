@@ -78,6 +78,9 @@ services:
       - ./config:/config
     environment:
       - TZ=Asia/Shanghai
+      - KEEP_APP_RUNNING=1
+      - ENABLE_CJK_FONT=1
+      - QQ_INSTANCE_COUNT=1
 ```
 
 2. Run with command: `docker-compose up -d`
