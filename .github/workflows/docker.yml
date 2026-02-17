@@ -17,6 +17,9 @@ permissions:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,14 +51,24 @@ jobs:
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
           echo "Building Docker images for tag: $TAG"
 
+      - name: Determine AppImage Filename
+        id: determine_filename
+        run: |
+          if [ "${{ matrix.arch }}" == "amd64" ]; then
+            echo "PATTERN=QQ_*_x86_64*.AppImage" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.arch }}" == "arm64" ]; then
+            echo "PATTERN=QQ_*_arm64*.AppImage" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG=${{ steps.determine_tag.outputs.TAG }}
+          PATTERN=${{ steps.determine_filename.outputs.PATTERN }}
           mkdir -p downloads
-          gh release download "$TAG" -p "QQ_*_x86_64*.AppImage" -D downloads
-          gh release download "$TAG" -p "QQ_*_arm64*.AppImage" -D downloads
+          echo "Downloading $PATTERN for tag $TAG..."
+          gh release download "$TAG" -p "$PATTERN" -D downloads
           ls -lh downloads/
 
       - name: Set up QEMU
@@ -78,47 +91,29 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Docker Images
-        run: |
-          VERSION=${{ steps.determine_tag.outputs.TAG }}
-          REPO_FULL_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          IMAGE_NAME=$(echo "$REPO_FULL_NAME" | cut -d'/' -f2)
-          DOCKERHUB_REPO="${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}"
-          GHCR_REPO="ghcr.io/${REPO_FULL_NAME}"
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          build-args: |
+             IMAGE_FILE=downloads/*.AppImage
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest-${{ matrix.arch }}
+            ghcr.io/${{ github.repository }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
+            ghcr.io/${{ github.repository }}:latest-${{ matrix.arch }}
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
 
-          # Build Docker images for supported architectures using AppImage
-          for IMG in downloads/*.AppImage; do
-            [ -f "$IMG" ] || continue
-
-            FILENAME=$(basename "$IMG")
-            echo "=== Processing $FILENAME ==="
-
-            # Extract architecture from filename and map to Docker arch
-            if echo "$FILENAME" | grep -q "x86_64"; then
-              ARCH="amd64"
-            elif echo "$FILENAME" | grep -q "arm64"; then
-              ARCH="arm64"
-            else
-              echo "Skipping unknown arch: $FILENAME"
-              continue
-            fi
-
-            echo "Building and pushing Docker image for $ARCH..."
-
-            TAG_VERSION="${VERSION}-${ARCH}"
-            TAG_LATEST="latest-${ARCH}"
-
-            docker buildx build \
-              --build-arg IMAGE_FILE="$IMG" \
-              -t "${DOCKERHUB_REPO}:${TAG_VERSION}" \
-              -t "${DOCKERHUB_REPO}:${TAG_LATEST}" \
-              -t "${GHCR_REPO}:${TAG_VERSION}" \
-              -t "${GHCR_REPO}:${TAG_LATEST}" \
-              --platform "linux/${ARCH}" \
-              --push \
-              .
-
-            echo "=== Done: $ARCH ==="
-          done
+  description:
+    needs: docker
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v4

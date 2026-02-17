@@ -9,9 +9,8 @@ ENV LANG=zh_CN.UTF-8 \
     DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies and extract AppImage
-# We use --mount to keep the AppImage file out of the image layer
-RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
-    apt-get update && \
+# Install dependencies (Cached Layer)
+RUN apt-get update && \
     # Install base dependencies and Electron/QQ runtime deps
     apt-get install -y --no-install-recommends \
         locales \
@@ -31,14 +30,16 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    # Extract AppImage using 7-Zip (robustly handles headers and SquashFS)
-    # 7z will extract the SquashFS contents directly to the target directory
-    7z x /tmp/app.AppImage -o/opt/QQ && \
-    chmod -R +x /opt/QQ && \
-    # General cleanup
+    # Cleanup apt cache to reduce layer size
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/log/*
+
+# Extract AppImage (Application Layer)
+# We use --mount to keep the AppImage file out of the image layer
+RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
+    7z x /tmp/app.AppImage -o/opt/QQ && \
+    chmod -R +x /opt/QQ
 
 # Copy the start script
 COPY startapp.sh /startapp.sh
