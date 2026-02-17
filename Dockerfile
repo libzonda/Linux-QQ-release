@@ -40,7 +40,7 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
     # General cleanup
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/log/*
+    rm -rf /var/lib/apt/lists/* /var/log/* /tmp/app.squashfs
 
 # Copy the start script
 COPY startapp.sh /startapp.sh
