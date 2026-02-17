@@ -34,14 +34,14 @@ jobs:
             TAG="${{ github.event.release.tag_name }}"
           fi
           
-          # Priority 3: Fallback to latest release
+          # Priority 3: Fallback to latest release using JSON query
           if [ -z "$TAG" ]; then
-            echo "No tag provided, fetching latest release..."
-            TAG=$(gh release list --limit 1 | awk '{print $1}')
+            echo "No tag provided, fetching latest release tag..."
+            TAG=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "")
           fi
           
           if [ -z "$TAG" ]; then
-            echo "ERROR: Could not determine tag."
+            echo "ERROR: Could not determine tag. Please specify one or ensure a release exists."
             exit 1
           fi
           
