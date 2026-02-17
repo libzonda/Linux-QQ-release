@@ -1,3 +1,4 @@
 #!/bin/sh
 export HOME=/config
-exec /opt/QQ/qq --no-sandbox
+# The main binary in the extracted AppImage is usually named 'qq'
+exec /opt/QQ/AppRun --no-sandbox

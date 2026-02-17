@@ -186,15 +186,15 @@ jobs:
           echo "DOCKERHUB_REPO=$DOCKERHUB_REPO"
           echo "GHCR_REPO=$GHCR_REPO"
 
-          # Only build Docker images for architectures supported by the base image
-          for DEB in downloads/*_amd64*.deb downloads/*_arm64*.deb; do
-            [ -f "$DEB" ] || continue
+          # Build Docker images for supported architectures using AppImage
+          for IMG in downloads/*_x86_64*.AppImage downloads/*_arm64*.AppImage; do
+            [ -f "$IMG" ] || continue
 
-            FILENAME=$(basename "$DEB")
+            FILENAME=$(basename "$IMG")
             echo "=== Processing $FILENAME ==="
 
-            # Extract architecture from filename
-            if echo "$FILENAME" | grep -q "amd64"; then
+            # Extract architecture from filename and map to Docker arch
+            if echo "$FILENAME" | grep -q "x86_64"; then
               ARCH="amd64"
             elif echo "$FILENAME" | grep -q "arm64"; then
               ARCH="arm64"
@@ -209,7 +209,7 @@ jobs:
             TAG_LATEST="latest-${ARCH}"
 
             docker buildx build \
-              --build-arg DEB_FILE="$DEB" \
+              --build-arg IMAGE_FILE="$IMG" \
               -t "${DOCKERHUB_REPO}:${TAG_VERSION}" \
               -t "${DOCKERHUB_REPO}:${TAG_LATEST}" \
               -t "${GHCR_REPO}:${TAG_VERSION}" \
