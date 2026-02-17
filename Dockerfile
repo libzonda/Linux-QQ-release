@@ -33,8 +33,9 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
     update-locale LANG=zh_CN.UTF-8 && \
     # Extract AppImage without executing it (to avoid Exec format error on multi-arch)
     # We find the offset of the SquashFS payload (magic bytes 'hsqs')
+    # Using dd with skip_bytes for high performance on large files
     OFFSET=$(grep -abo hsqs /tmp/app.AppImage | cut -d: -f1 | head -n 1) && \
-    dd if=/tmp/app.AppImage bs=1 skip=$OFFSET of=/tmp/app.squashfs && \
+    dd if=/tmp/app.AppImage bs=1M skip=$OFFSET iflag=skip_bytes of=/tmp/app.squashfs && \
     unsquashfs -d /opt/QQ -n -li /tmp/app.squashfs && \
     # General cleanup
     apt-get autoremove -y && \
