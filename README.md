@@ -15,6 +15,7 @@ This project uses automated workflows to ensure that users can obtain the latest
 *   **Automated Update Monitoring**: Monitors version changes on the official Tencent QQ page around the clock.
 *   **Full Architecture Support**: Automatically collects all officially supported architectures, including x86 (deb/rpm/AppImage), arm64, loongarch64, and mips64el.
 *   **Reliable Archive Downloads**: Automatically publishes all installation packages to GitHub Releases. Downloading via GitHub's CDN effectively avoids issues where official download links may be slow or inaccessible, and also provides a convenient way to trace back historical versions.
+*   **Multi-Instance Support**: Provides a powerful Docker image that supports running multiple QQ accounts simultaneously with full data isolation and noVNC web access.
 
 ## Download via CLI
 
@@ -104,72 +105,6 @@ services:
 | Volume | Description |
 | :--- | :--- |
 | `/config` | Application data storage. Supports multi-instance isolation (`/config/.config/QQ`, `/config/.config/QQ_2`, etc.). |
-
----
-*Disclaimer: This project is for automated archiving purposes only. The copyright of the installation packages belongs to Tencent.*
-*   **Multi-Arch**: Supports `amd64` and `arm64`
-
-### Quick Start
-
-**Run from Docker Hub:**
-```bash
-# Replace <user> with the actual namespace (e.g., libzonda)
-docker run -d \
-  --name=linuxqq \
-  -p 5800:5800 \
-  -v /path/to/config:/config \
-  libzonda/linux-qq-release:latest-amd64
-```
-
-**Run from GHCR:**
-```bash
-docker run -d \
-  --name=linuxqq \
-  -p 5800:5800 \
-  -v /path/to/config:/config \
-  -e QQ_INSTANCE_COUNT=1 \
-  ghcr.io/libzonda/linux-qq-release:latest-amd64
-```
-
-Open your browser and visit `http://localhost:5800`.
-
-### Using Docker Compose
-
-1. Create a `docker-compose.yml` file:
-
-```yaml
-services:
-  linuxqq:
-    image: ghcr.io/libzonda/linux-qq-release:latest-amd64
-    container_name: linuxqq
-    restart: unless-stopped
-    ports:
-      - "5800:5800"
-    volumes:
-      - ./config:/config
-    environment:
-      - TZ=Asia/Shanghai
-      - KEEP_APP_RUNNING=1
-      - ENABLE_CJK_FONT=1
-      - QQ_INSTANCE_COUNT=1
-```
-
-2. Run with command: `docker-compose up -d`
-
-### Multi-Instance Data Persistence
-
-When running multiple instances (e.g., `QQ_INSTANCE_COUNT=3`), a single volume mount at `/config` is sufficient to persist data for **all** instances.
-
-The data will be organized automatically as follows:
-*   **Instance 1 (Main)**: `/config/.config/QQ`
-*   **Instance 2**: `/config/.config/QQ_2`
-*   **Instance 3**: `/config/.config/QQ_3`
-*   ...and so on.
-
-You do **not** need to mount separate volumes for each instance.
-
-
-
 
 ---
 *Disclaimer: This project is for automated archiving purposes only. The copyright of the installation packages belongs to Tencent.*

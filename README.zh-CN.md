@@ -15,6 +15,7 @@
 *   **自动监控更新**：全天候定时监测腾讯 QQ 官方页面的版本变动。
 *   **全架构支持**：自动收集包括 x86 (deb/rpm/AppImage)、arm64、loongarch64 以及 mips64el 在内的所有官方支持架构。
 *   **可靠的归档下载**：将所有安装包自动发布至 GitHub Releases。通过 GitHub 提供的 CDN 下载，可以有效避免官方下载链接偶尔速度较慢或无法访问的问题，同时也提供了历史版本的便捷回溯。
+*   **Docker 多开支持**：提供强大的 Docker 镜像，支持在单个容器内同时运行多个 QQ 账号，并实现完美的数据隔离与 noVNC 网页访问。
 
 ## 命令行下载 (CLI)
 
@@ -105,56 +106,6 @@ services:
 | 挂载点 | 说明 |
 | :--- | :--- |
 | `/config` | 应用数据存储目录。支持多开数据隔离 (`/config/.config/QQ`, `/config/.config/QQ_2` 等)。 |
-
----
-*声明：本项目仅用于自动化归档，安装包版权归腾讯公司所有。*
-*   **多架构**: 支持 `amd64` 和 `arm64`
-
-### 快速开始
-
-**从 Docker Hub 运行:**
-```bash
-# 请将 <user> 替换为实际的命名空间 (例如 libzonda)
-docker run -d \
-  --name=linuxqq \
-  -p 5800:5800 \
-  -v /path/to/config:/config \
-  libzonda/linux-qq-release:latest-amd64
-```
-
-**从 GHCR 运行:**
-```bash
-docker run -d \
-  --name=linuxqq \
-  -p 5800:5800 \
-  -v /path/to/config:/config \
-  ghcr.io/libzonda/linux-qq-release:latest-amd64
-```
-
-打开浏览器访问 `http://localhost:5800` 即可。
-
-### 使用 Docker Compose
-
-1. 创建 `docker-compose.yml` 文件：
-
-```yaml
-services:
-  linuxqq:
-    image: ghcr.io/libzonda/linux-qq-release:latest-amd64
-    container_name: linuxqq
-    restart: unless-stopped
-    ports:
-      - "5800:5800"
-    volumes:
-      - ./config:/config
-    environment:
-      - TZ=Asia/Shanghai
-```
-
-2. 运行命令：`docker-compose up -d`
-
-
-
 
 ---
 *声明：本项目仅用于自动化归档，安装包版权归腾讯公司所有。*
