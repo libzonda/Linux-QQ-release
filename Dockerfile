@@ -13,6 +13,7 @@ ENV LANG=zh_CN.UTF-8 \
 RUN apt-get update && \
     # Install base dependencies and Electron/QQ runtime deps
     apt-get install -y --no-install-recommends \
+        software-properties-common \
         locales \
         dbus \
         fonts-wqy-zenhei \
@@ -25,7 +26,15 @@ RUN apt-get update && \
         libgtk-3-0t64 \
         libxss1 \
         libxtst6 \
-        binutils && \
+        binutils \
+        xdg-utils && \
+    # Setup PPA for non-snap Firefox
+    add-apt-repository ppa:mozillateam/ppa && \
+    echo 'Package: firefox*' > /etc/apt/preferences.d/mozilla-firefox && \
+    echo 'Pin: release o=LP-PPA-mozillateam' >> /etc/apt/preferences.d/mozilla-firefox && \
+    echo 'Pin-Priority: 1001' >> /etc/apt/preferences.d/mozilla-firefox && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends firefox && \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
