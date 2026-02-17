@@ -12,6 +12,7 @@ ENV LANG=zh_CN.UTF-8 \
 # We use --mount to keep the AppImage file out of the image layer
 RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
     apt-get update && \
+    # Install base dependencies and Electron/QQ runtime deps
     apt-get install -y --no-install-recommends \
         locales \
         dbus \
@@ -19,21 +20,21 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
         libayatana-appindicator3-1 \
         libkeybinder-3.0-0 \
         desktop-file-utils \
-        # Electron/QQ runtime deps
         libnss3 \
         libgbm1 \
         libasound2t64 \
-        libgtk-3-0 \
+        libgtk-3-0t64 \
         libxss1 \
         libxtst6 \
-        # To extract AppImage
         binutils && \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
     # Extract AppImage
-    chmod +x /tmp/app.AppImage && \
-    /tmp/app.AppImage --appimage-extract && \
+    # We copy to a writable location because the bind mount is read-only
+    cp /tmp/app.AppImage /tmp/qq.AppImage && \
+    chmod +x /tmp/qq.AppImage && \
+    /tmp/qq.AppImage --appimage-extract && \
     mv squashfs-root /opt/QQ && \
     # General cleanup
     apt-get autoremove -y && \
