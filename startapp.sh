@@ -36,10 +36,10 @@ while [ "$i" -le "$QQ_INSTANCE_COUNT" ]; do
     # Isolate user data to prevent white screen/crashes
     # Default user data is in ~/.config/QQ
     DATA_DIR="$HOME/.config/QQ_$i"
-    "$BINARY" --no-sandbox --user-data-dir="$DATA_DIR" &
+    "$BINARY" --no-sandbox --disable-gpu --disable-dev-shm-usage --user-data-dir="$DATA_DIR" &
     i=$((i + 1))
     sleep 5
 done
 
 echo "Starting main QQ instance..."
-exec "$BINARY" --no-sandbox
+exec "$BINARY" --no-sandbox --disable-gpu --disable-dev-shm-usage
