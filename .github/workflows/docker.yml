@@ -23,12 +23,28 @@ jobs:
 
       - name: Determine Tag
         id: determine_tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.tag_name }}" ]; then
-            TAG="${{ github.event.inputs.tag_name }}"
-          else
+          # Priority 1: Manual input
+          TAG="${{ github.event.inputs.tag_name }}"
+          
+          # Priority 2: Release event context
+          if [ -z "$TAG" ]; then
             TAG="${{ github.event.release.tag_name }}"
           fi
+          
+          # Priority 3: Fallback to latest release
+          if [ -z "$TAG" ]; then
+            echo "No tag provided, fetching latest release..."
+            TAG=$(gh release list --limit 1 | awk '{print $1}')
+          fi
+          
+          if [ -z "$TAG" ]; then
+            echo "ERROR: Could not determine tag."
+            exit 1
+          fi
+          
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
           echo "Building Docker images for tag: $TAG"
 
