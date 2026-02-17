@@ -26,16 +26,16 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
         libgtk-3-0t64 \
         libxss1 \
         libxtst6 \
-        binutils && \
+        binutils \
+        squashfs-tools && \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    # Extract AppImage
-    # We copy to a writable location because the bind mount is read-only
-    cp /tmp/app.AppImage /tmp/qq.AppImage && \
-    chmod +x /tmp/qq.AppImage && \
-    /tmp/qq.AppImage --appimage-extract && \
-    mv squashfs-root /opt/QQ && \
+    # Extract AppImage without executing it (to avoid Exec format error on multi-arch)
+    # We find the offset of the SquashFS payload (magic bytes 'hsqs')
+    OFFSET=$(grep -abo hsqs /tmp/app.AppImage | cut -d: -f1 | head -n 1) && \
+    dd if=/tmp/app.AppImage bs=1 skip=$OFFSET of=/tmp/app.squashfs && \
+    unsquashfs -d /opt/QQ -n -li /tmp/app.squashfs && \
     # General cleanup
     apt-get autoremove -y && \
     apt-get clean && \
