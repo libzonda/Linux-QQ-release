@@ -32,11 +32,82 @@ wget https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_la
 
 ## Docker 使用
 
-本项目还提供了 Docker 镜像，让你可以在容器中通过 Web 界面 (noVNC) 运行 Linux QQ。
+在 Docker 容器中运行 Linux QQ，并提供基于 Web 的图形界面 (noVNC)。
+
+![Screenshot 1](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot1.jpeg)
+![Screenshot 2](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot2.jpeg)
 
 ### 特性
-*   **Web GUI**: 通过浏览器访问 QQ，默认地址 `http://localhost:5800`
-*   **中文支持**: 内置 `Noto Sans CJK` 和 `文泉驿` 字体，支持中文输入
+
+- **Web GUI**: 通过浏览器访问 QQ，默认地址 `http://localhost:5800`。
+- **内置浏览器**: 集成 **Firefox** (非 Snap 版)，确保能正常打开 QQ 邮箱、空间等外链。
+- **多开支持**: 通过 `QQ_INSTANCE_COUNT` 环境变量，支持在同一容器内同时运行多个 QQ 账号。
+- **中文支持**: 预置 `zh_CN.UTF-8` 环境及 `Noto Sans CJK`/`文泉驿` 字体，完美支持中文显示与输入。
+- **多架构**: 支持 `linux/amd64` 和 `linux/arm64`。
+
+### 快速开始
+
+**从 Docker Hub 运行:**
+```bash
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  -e QQ_INSTANCE_COUNT=1 \
+  libzonda/linux-qq-release:latest-amd64
+```
+
+**从 GHCR 运行:**
+```bash
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  -e QQ_INSTANCE_COUNT=1 \
+  ghcr.io/libzonda/linux-qq-release:latest-amd64
+```
+
+打开浏览器访问 `http://localhost:5800` 即可。
+
+### Docker Compose
+
+```yaml
+services:
+  linuxqq:
+    image: ghcr.io/libzonda/linux-qq-release:latest-amd64
+    container_name: linuxqq
+    restart: unless-stopped
+    ports:
+      - "5800:5800"
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Asia/Shanghai
+      - QQ_INSTANCE_COUNT=1
+      - KEEP_APP_RUNNING=1
+      # - VNC_PASSWORD=secret
+```
+
+### 配置说明
+
+#### 环境变量
+
+| 变量名 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `TZ` | `UTC` | 时区设置 (例如 `Asia/Shanghai`)。 |
+| `QQ_INSTANCE_COUNT` | `1` | 启动的 QQ 实例数量。 |
+| `KEEP_APP_RUNNING` | `0` | 设置为 `1` 可在应用崩溃时自动重启。 |
+| `VNC_PASSWORD` | (未设置) | VNC 访问密码。 |
+| `ENABLE_CJK_FONT` | `1` | 启用中文字体 (默认开启)。 |
+
+#### 存储卷
+
+| 挂载点 | 说明 |
+| :--- | :--- |
+| `/config` | 应用数据存储目录。支持多开数据隔离 (`/config/.config/QQ`, `/config/.config/QQ_2` 等)。 |
+
+---
+*声明：本项目仅用于自动化归档，安装包版权归腾讯公司所有。*
 *   **多架构**: 支持 `amd64` 和 `arm64`
 
 ### 快速开始

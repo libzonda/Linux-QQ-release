@@ -31,11 +31,82 @@ wget https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_la
 
 ## Docker Usage
 
-You can also run Linux QQ in a Docker container with a web-based GUI (noVNC).
+Run Tencent QQ for Linux in a Docker container with a web-accessible GUI (noVNC).
+
+![Screenshot 1](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot1.jpeg)
+![Screenshot 2](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot2.jpeg)
 
 ### Features
-*   **Web GUI**: Access QQ via browser at `http://localhost:5800`
-*   **Chinese Support**: Built-in Chinese fonts (`Noto Sans CJK`, `WenQuanYi`) and input method support
+
+- **Web GUI**: Access QQ via browser at `http://localhost:5800`.
+- **Integrated Browser**: Built-in **Firefox** (non-Snap) ensures external links (Email, Qzone) open correctly.
+- **Multi-Instance**: Support running multiple QQ accounts simultaneously via `QQ_INSTANCE_COUNT`.
+- **Chinese Support**: Pre-configured `zh_CN.UTF-8` locale and fonts (`Noto Sans CJK`, `WenQuanYi`).
+- **Multi-Arch**: Supports `amd64` and `arm64`.
+
+### Quick Start
+
+**Run from Docker Hub:**
+```bash
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  -e QQ_INSTANCE_COUNT=1 \
+  libzonda/linux-qq-release:latest-amd64
+```
+
+**Run from GHCR:**
+```bash
+docker run -d \
+  --name=linuxqq \
+  -p 5800:5800 \
+  -v /path/to/config:/config \
+  -e QQ_INSTANCE_COUNT=1 \
+  ghcr.io/libzonda/linux-qq-release:latest-amd64
+```
+
+Open your browser and visit `http://localhost:5800`.
+
+### Docker Compose
+
+```yaml
+services:
+  linuxqq:
+    image: ghcr.io/libzonda/linux-qq-release:latest-amd64
+    container_name: linuxqq
+    restart: unless-stopped
+    ports:
+      - "5800:5800"
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Asia/Shanghai
+      - QQ_INSTANCE_COUNT=1
+      - KEEP_APP_RUNNING=1
+      # - VNC_PASSWORD=secret
+```
+
+### Configuration
+
+#### Environment Variables
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `TZ` | `UTC` | Time zone (e.g., `Asia/Shanghai`). |
+| `QQ_INSTANCE_COUNT` | `1` | Number of QQ instances to run. |
+| `KEEP_APP_RUNNING` | `0` | Set to `1` to restart application if it crashes. |
+| `VNC_PASSWORD` | (unset) | Password for VNC access. |
+| `ENABLE_CJK_FONT` | `1` | Enable Chinese fonts (default: 1). |
+
+#### Volumes
+
+| Volume | Description |
+| :--- | :--- |
+| `/config` | Application data storage. Supports multi-instance isolation (`/config/.config/QQ`, `/config/.config/QQ_2`, etc.). |
+
+---
+*Disclaimer: This project is for automated archiving purposes only. The copyright of the installation packages belongs to Tencent.*
 *   **Multi-Arch**: Supports `amd64` and `arm64`
 
 ### Quick Start
