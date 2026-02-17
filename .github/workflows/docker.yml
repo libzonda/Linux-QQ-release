@@ -51,13 +51,13 @@ jobs:
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
           echo "Building Docker images for tag: $TAG"
 
-      - name: Determine AppImage Filename
+      - name: Determine DEB Filename
         id: determine_filename
         run: |
           if [ "${{ matrix.arch }}" == "amd64" ]; then
-            echo "PATTERN=QQ_*_x86_64*.AppImage" >> $GITHUB_OUTPUT
+            echo "PATTERN=*amd64.deb" >> $GITHUB_OUTPUT
           elif [ "${{ matrix.arch }}" == "arm64" ]; then
-            echo "PATTERN=QQ_*_arm64*.AppImage" >> $GITHUB_OUTPUT
+            echo "PATTERN=*arm64.deb" >> $GITHUB_OUTPUT
           fi
 
       - name: Download Release Assets
@@ -109,7 +109,7 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           push: true
           build-args: |
-             IMAGE_FILE=downloads/*.AppImage
+             PACKAGE_FILE=downloads/*.deb
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.image_name.outputs.REPO_NAME }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.image_name.outputs.REPO_NAME }}:latest-${{ matrix.arch }}

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM jlesage/baseimage-gui:ubuntu-24.04-v4
 
-ARG IMAGE_FILE
+ARG PACKAGE_FILE
 
 # Set environment
 ENV LANG=zh_CN.UTF-8 \
@@ -25,8 +25,7 @@ RUN apt-get update && \
         libgtk-3-0t64 \
         libxss1 \
         libxtst6 \
-        binutils \
-        7zip && \
+        binutils && \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
@@ -35,11 +34,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/log/*
 
-# Extract AppImage (Application Layer)
-# We use --mount to keep the AppImage file out of the image layer
-RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
-    7z x /tmp/app.AppImage -o/opt/QQ && \
-    chmod -R +x /opt/QQ
+# Install QQ from DEB (Application Layer)
+COPY ${PACKAGE_FILE} /tmp/qq.deb
+RUN apt-get update && \
+    apt-get install -y /tmp/qq.deb && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/qq.deb
 
 # Copy the start script
 COPY startapp.sh /startapp.sh
