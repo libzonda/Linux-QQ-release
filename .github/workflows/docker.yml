@@ -71,6 +71,26 @@ jobs:
           gh release download "$TAG" -p "$PATTERN" -D downloads
           ls -lh downloads/
 
+      - name: Pick Single DEB File
+        id: pick_file
+        run: |
+          # Find the first .deb file (filtering out 'latest' if we want specific version, but usually they are identical content)
+          # We prefer the one with the explicit version number if available
+          FILE=$(find downloads -name "*.deb" ! -name "*latest*" | head -n 1)
+          if [ -z "$FILE" ]; then
+             # Fallback if only latest exists
+             FILE=$(find downloads -name "*.deb" | head -n 1)
+          fi
+          
+          if [ -z "$FILE" ]; then
+            echo "ERROR: No .deb file found in downloads/"
+            ls -R downloads/
+            exit 1
+          fi
+          
+          echo "Selected package file: $FILE"
+          echo "FILE=$FILE" >> $GITHUB_OUTPUT
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -109,7 +129,7 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           push: true
           build-args: |
-             PACKAGE_FILE=downloads/*.deb
+             PACKAGE_FILE=${{ steps.pick_file.outputs.FILE }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.image_name.outputs.REPO_NAME }}:${{ steps.determine_tag.outputs.TAG }}-${{ matrix.arch }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.image_name.outputs.REPO_NAME }}:latest-${{ matrix.arch }}
