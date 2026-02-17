@@ -85,6 +85,18 @@ services:
 
 2. Run with command: `docker-compose up -d`
 
+### Multi-Instance Data Persistence
+
+When running multiple instances (e.g., `QQ_INSTANCE_COUNT=3`), a single volume mount at `/config` is sufficient to persist data for **all** instances.
+
+The data will be organized automatically as follows:
+*   **Instance 1 (Main)**: `/config/.config/QQ`
+*   **Instance 2**: `/config/.config/QQ_2`
+*   **Instance 3**: `/config/.config/QQ_3`
+*   ...and so on.
+
+You do **not** need to mount separate volumes for each instance.
+
 
 
 
