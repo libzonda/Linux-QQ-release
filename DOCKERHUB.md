@@ -6,8 +6,7 @@
 [![License](https://img.shields.io/github/license/libzonda/Linux-QQ-release?style=flat-square)](https://github.com/libzonda/Linux-QQ-release/blob/main/LICENSE)
 [![Platform](https://img.shields.io/badge/platform-linux%2Famd64%20%7C%20linux%2Farm64-blue?style=flat-square)](https://hub.docker.com/r/libzonda/linux-qq-release)
 
-This Docker image provides Tencent QQ for Linux with a web-accessible GUI.
- Based on `jlesage/baseimage-gui:ubuntu-24.04-v4`.
+This Docker image provides Tencent QQ for Linux with a web-accessible GUI, based on `jlesage/baseimage-gui:ubuntu-24.04-v4`.
 
 ![Screenshot 1](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot1.jpeg)
 ![Screenshot 2](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot2.jpeg)
