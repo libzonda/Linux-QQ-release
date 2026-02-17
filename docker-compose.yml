@@ -12,4 +12,5 @@ services:
       - TZ=Asia/Shanghai
       - KEEP_APP_RUNNING=1
       - ENABLE_CJK_FONT=1
+      - QQ_INSTANCE_COUNT=1
       # - VNC_PASSWORD=secret  # Optional: set VNC password

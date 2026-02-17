@@ -2,23 +2,41 @@
 export HOME=/config
 cd /opt/QQ
 
-# AppRun in Linux QQ is broken in some envs (calculates path to /qq), 
-# so we find and run the binary directly.
+# AppRun in Linux QQ is broken in some envs, so we find and run the binary directly.
+BINARY=""
 if [ -f "qq" ]; then
-    exec ./qq --no-sandbox
+    BINARY="./qq"
 elif [ -f "QQ" ]; then
-    exec ./QQ --no-sandbox
+    BINARY="./QQ"
 elif [ -f "linuxqq" ]; then
-    exec ./linuxqq --no-sandbox
+    BINARY="./linuxqq"
 else
     # Fallback: Find largest executable file (likely the binary)
     BINARY=$(find . -maxdepth 1 -type f -executable ! -name "AppRun" ! -name "*.sh" -printf "%s\t%p\n" | sort -n | tail -1 | cut -f2)
-    if [ -n "$BINARY" ]; then
-        echo "Found likely executable: $BINARY"
-        exec "$BINARY" --no-sandbox
-    else
-        echo "Error: Could not find executable in /opt/QQ"
-        ls -la
-        exit 1
-    fi
 fi
+
+if [ -z "$BINARY" ]; then
+    echo "Error: Could not find executable in /opt/QQ"
+    ls -la
+    exit 1
+fi
+
+# Determine number of instances
+QQ_INSTANCE_COUNT=${QQ_INSTANCE_COUNT:-1}
+if [ "$QQ_INSTANCE_COUNT" -lt 1 ]; then
+    QQ_INSTANCE_COUNT=1
+fi
+
+echo "Starting $QQ_INSTANCE_COUNT instance(s) of QQ..."
+
+# Start secondary instances in background
+i=2
+while [ "$i" -le "$QQ_INSTANCE_COUNT" ]; do
+    echo "Starting QQ instance $i..."
+    "$BINARY" --no-sandbox &
+    i=$((i + 1))
+    sleep 2
+done
+
+echo "Starting main QQ instance..."
+exec "$BINARY" --no-sandbox

@@ -56,6 +56,7 @@ docker run -d \
   --name=linuxqq \
   -p 5800:5800 \
   -v /path/to/config:/config \
+  -e QQ_INSTANCE_COUNT=1 \
   ghcr.io/libzonda/linux-qq-release:latest-amd64
 ```
 

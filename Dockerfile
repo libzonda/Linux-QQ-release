@@ -6,7 +6,8 @@ ARG PACKAGE_FILE
 # Set environment
 ENV LANG=zh_CN.UTF-8 \
     LC_ALL=zh_CN.UTF-8 \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    QQ_INSTANCE_COUNT=1
 
 # Install dependencies and extract AppImage
 # Install dependencies (Cached Layer)
