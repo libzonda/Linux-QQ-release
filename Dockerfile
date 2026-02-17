@@ -27,20 +27,17 @@ RUN --mount=type=bind,source=${IMAGE_FILE},target=/tmp/app.AppImage \
         libxss1 \
         libxtst6 \
         binutils \
-        squashfs-tools && \
+        7zip && \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    # Extract AppImage without executing it (to avoid Exec format error on multi-arch)
-    # We find the offset of the SquashFS payload (magic bytes 'hsqs')
-    # Using dd with skip_bytes for high performance on large files
-    OFFSET=$(grep -abo hsqs /tmp/app.AppImage | cut -d: -f1 | head -n 1) && \
-    dd if=/tmp/app.AppImage bs=1M skip=$OFFSET iflag=skip_bytes of=/tmp/app.squashfs && \
-    unsquashfs -d /opt/QQ -n -li /tmp/app.squashfs && \
+    # Extract AppImage using 7-Zip (robustly handles headers and SquashFS)
+    # 7z will extract the SquashFS contents directly to the target directory
+    7z x /tmp/app.AppImage -o/opt/QQ && \
     # General cleanup
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /var/log/* /tmp/app.squashfs
+    rm -rf /var/lib/apt/lists/* /var/log/*
 
 # Copy the start script
 COPY startapp.sh /startapp.sh
