@@ -43,6 +43,16 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/log/*
 
+# Create Firefox wrapper to disable sandbox
+# Docker containers often lack the privileges for Firefox's user namespace sandbox
+RUN echo '#!/bin/sh' > /usr/local/bin/firefox && \
+    echo 'echo "Starting Firefox with sandbox disabled..."' >> /usr/local/bin/firefox && \
+    echo 'export MOZ_DISABLE_CONTENT_SANDBOX=1' >> /usr/local/bin/firefox && \
+    echo 'export MOZ_DISABLE_GMP_SANDBOX=1' >> /usr/local/bin/firefox && \
+    echo 'export MOZ_DISABLE_RDD_SANDBOX=1' >> /usr/local/bin/firefox && \
+    echo 'exec /usr/bin/firefox "$@"' >> /usr/local/bin/firefox && \
+    chmod +x /usr/local/bin/firefox
+
 # Install QQ from DEB (Application Layer)
 COPY ${PACKAGE_FILE} /tmp/qq.deb
 RUN apt-get update && \
