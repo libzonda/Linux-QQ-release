@@ -22,6 +22,9 @@ This Docker image provides Tencent QQ for Linux with a web-accessible GUI, based
 #### Taskbar Support
 ![Taskbar Demo](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_enable_task_bar.jpeg)
 
+#### Secure Access
+![VNC Password Auth](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_vnc_password.jpeg)
+
 ## Features
 
 - **Web GUI (noVNC)**: Access QQ directly via browser at `http://localhost:5800`.

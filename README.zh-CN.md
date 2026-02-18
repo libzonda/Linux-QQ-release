@@ -62,6 +62,11 @@ wget https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_la
 
 ![任务栏演示](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_enable_task_bar.jpeg)
 
+#### 3. 安全访问 (VNC Password)
+强烈建议设置 `VNC_PASSWORD` 环境变量。设置后，访问网页图形界面将需要密码验证，从而保护您的账号安全。
+
+![VNC 密码验证](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_vnc_password.jpeg)
+
 ### 特性
 
 - **Web GUI**: 通过浏览器访问 QQ，默认地址 `http://localhost:5800`。

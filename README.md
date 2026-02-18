@@ -61,6 +61,11 @@ Set `ENABLE_TASKBAR=1` to enable the bottom `tint2` taskbar. This is extremely h
 
 ![Taskbar Demo](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_enable_task_bar.jpeg)
 
+#### 3. Secure Access (VNC Password)
+We strongly recommend setting the `VNC_PASSWORD` environment variable. This ensures your web GUI is protected by a password, keeping your sessions secure.
+
+![VNC Password Auth](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_vnc_password.jpeg)
+
 ### Features
 
 - **Web GUI**: Access QQ via browser at `http://localhost:5800`.
