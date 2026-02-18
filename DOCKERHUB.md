@@ -61,7 +61,8 @@ services:
 | `QQ_INSTANCE_COUNT` | `1` | Number of QQ instances to run. |
 | `KEEP_APP_RUNNING` | `0` | Set to `1` to restart application if it crashes. |
 | `VNC_PASSWORD` | (unset) | Password for accessing the GUI. **Highly recommended** to set this for security. |
-| `ENABLE_CJK_FONT` | `1` | Enable Chinese fonts (default: 1). |
+| `ENABLE_CJK_FONT` | `1` | Enable Chinese fonts (default: 1).|
+| `ENABLE_TASKBAR` | `0` | Set to `1` to enable a lightweight taskbar (`tint2`) for managing minimized windows. |
 
 ### Volumes
 

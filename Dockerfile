@@ -7,7 +7,8 @@ ARG PACKAGE_FILE
 ENV LANG=zh_CN.UTF-8 \
     LC_ALL=zh_CN.UTF-8 \
     DEBIAN_FRONTEND=noninteractive \
-    QQ_INSTANCE_COUNT=1
+    QQ_INSTANCE_COUNT=1 \
+    ENABLE_TASKBAR=0
 
 # Install dependencies and extract AppImage
 # Install dependencies (Cached Layer)
@@ -31,7 +32,8 @@ RUN apt-get update && \
         binutils \
         xdg-utils \
         wmctrl \
-        procps && \
+        procps \
+        tint2 && \
     # Setup PPA for non-snap Firefox
     add-apt-repository ppa:mozillateam/ppa && \
     echo 'Package: firefox*' > /etc/apt/preferences.d/mozilla-firefox && \
@@ -39,8 +41,6 @@ RUN apt-get update && \
     echo 'Pin-Priority: 1001' >> /etc/apt/preferences.d/mozilla-firefox && \
     apt-get update && \
     apt-get install -y --no-install-recommends firefox && \
-    # Improve Openbox UX: Remove minimize button ('I') to prevent "lost" windows
-    sed -i 's/<titleLayout>.*<\/titleLayout>/<titleLayout>NLMC<\/titleLayout>/g' /etc/xdg/openbox/rc.xml && \
     # Setup locales
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \

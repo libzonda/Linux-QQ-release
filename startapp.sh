@@ -27,6 +27,12 @@ if [ "$QQ_INSTANCE_COUNT" -lt 1 ]; then
     QQ_INSTANCE_COUNT=1
 fi
 
+# Launch lightweight taskbar if enabled
+if [ "$ENABLE_TASKBAR" = "1" ]; then
+    echo "Starting tint2 taskbar..."
+    tint2 &
+fi
+
 echo "Starting $QQ_INSTANCE_COUNT instance(s) of QQ..."
 
 # Start secondary instances in background
