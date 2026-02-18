@@ -42,8 +42,24 @@ wget https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_la
 
 Run Tencent QQ for Linux in a Docker container with a web-accessible GUI (noVNC).
 
-![Screenshot 1](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot1.jpeg)
-![Screenshot 2](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot2.jpeg)
+![Main UI Preview](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_main.jpeg)
+
+### Key Features
+
+- **Web GUI**: Access QQ via browser at `http://localhost:5800`.
+- **Integrated Firefox**: Built-in browser for link redirection.
+- **Docker Multi-Instance**: Run multiple accounts in one container.
+- **Optional Taskbar**: Integrated `tint2` to manage minimized windows.
+
+#### 1. Multi-Instance Support
+By setting the `QQ_INSTANCE_COUNT` environment variable, you can launch multiple QQ instances. Each instance has an isolated data directory.
+
+![Multi-Instance Demo](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_muilt_instance.jpeg)
+
+#### 2. Optional Taskbar (tint2)
+Set `ENABLE_TASKBAR=1` to enable the bottom `tint2` taskbar. This is extremely helpful for restoring minimized windows.
+
+![Taskbar Demo](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_enable_task_bar.jpeg)
 
 ### Features
 

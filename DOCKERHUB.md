@@ -8,8 +8,19 @@
 
 This Docker image provides Tencent QQ for Linux with a web-accessible GUI, based on `jlesage/baseimage-gui:ubuntu-24.04-v4`.
 
-![Screenshot 1](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot1.jpeg)
-![Screenshot 2](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot2.jpeg)
+![Main UI Preview](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_main.jpeg)
+
+### Highlights
+
+- **Multi-Instance Support**: Easily run multiple QQ accounts in one container.
+- **Integrated Browser**: Firefox integration to ensure all links open properly.
+- **Optional Taskbar**: Switch on `tint2` using `ENABLE_TASKBAR=1`.
+
+#### Multi-Instance
+![Multi-Instance Demo](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_muilt_instance.jpeg)
+
+#### Taskbar Support
+![Taskbar Demo](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_enable_task_bar.jpeg)
 
 ## Features
 

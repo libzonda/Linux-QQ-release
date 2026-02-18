@@ -43,8 +43,24 @@ wget https://github.com/libzonda/Linux-QQ-Release/releases/latest/download/QQ_la
 
 在 Docker 容器中运行 Linux QQ，并提供基于 Web 的图形界面 (noVNC)。
 
-![Screenshot 1](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot1.jpeg)
-![Screenshot 2](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot2.jpeg)
+![主界面演示](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_main.jpeg)
+
+### 核心特性
+
+- **Web 图形界面**: 通过浏览器直接访问，默认地址 `http://localhost:5800`。
+- **内置 Firefox 浏览器**: 解决链接跳转问题。
+- **Docker 容器多开**: 完美支持同容器多账号运行。
+- **可选任务栏**: 集成 `tint2`，解决窗口最小化找回问题。
+
+#### 1. 多开支持 (Multi-Instance)
+通过设置环境变量 `QQ_INSTANCE_COUNT`，您可以轻松启动多个 QQ 实例。每个实例都有独立的数据目录，确保互不干扰。
+
+![多开演示](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_muilt_instance.jpeg)
+
+#### 2. 可选任务栏 (Optional Taskbar)
+设置 `ENABLE_TASKBAR=1` 即可启用底部的 `tint2` 任务栏。这在您最小化窗口时非常有用，可以快速从底部任务栏恢复窗口。
+
+![任务栏演示](https://raw.githubusercontent.com/libzonda/Linux-QQ-Release/main/screenshot_enable_task_bar.jpeg)
 
 ### 特性
 
